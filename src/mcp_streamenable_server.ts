@@ -137,25 +137,17 @@ const transport = new StreamableHTTPServerTransport({
 
 // 挂载 MCP 服务器到 Koa
 router.post("/mcp", async (ctx) => {
-  console.log("post /mcp");
   weatherServer.request_context = ctx; // 设置请求上下文
-  ctx.respond = false; //告诉 Koa 不要自动处理 HTTP 响应
+  ctx.respond = false;
   await transport.handleRequest(ctx.req, ctx.res, ctx.request.body);
 });
 
 router.get("/mcp", async (ctx) => {
-  console.log("get /mcp");
   weatherServer.request_context = ctx; // 设置请求上下文
-  ctx.respond = false; //告诉 Koa 不要自动处理 HTTP 响应
+  ctx.respond = false;
   await transport.handleRequest(ctx.req, ctx.res);
 });
 
-router.delete("/mcp", async (ctx) => {
-  console.log("get /mcp");
-  weatherServer.request_context = ctx; // 设置请求上下文
-  ctx.respond = false; //告诉 Koa 不要自动处理 HTTP 响应
-  await transport.handleRequest(ctx.req, ctx.res);
-});
 // 挂载路由
 app.use(router.routes()).use(router.allowedMethods());
 
