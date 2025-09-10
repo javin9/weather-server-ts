@@ -3,7 +3,6 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import axios from "axios";
 
-// const API_KEY = "cf7f7888e7933d9864936d9e8ae87742";
 const API_HOST = "https://restapi.amap.com";
 
 async function main() {
