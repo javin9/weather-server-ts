@@ -1,8 +1,14 @@
-mcp server
+# mcp server demo
+
+## 环境
+
+```bash
+npm i
+```
 
 ## cursor 配置
 
-## stdio 方式
+### stdio 方式
 
 ```json
 {
