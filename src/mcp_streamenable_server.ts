@@ -7,6 +7,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamablehttp.js";
 import { TextContent } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 
 // 配置常量
 const HOST = "https://restapi.amap.com";
@@ -131,18 +132,27 @@ app.use(bodyParser());
 
 // 创建 Streamable HTTP 传输
 const transport = new StreamableHTTPServerTransport({
-  sessionIdGenerator: () => Math.random().toString(36).substring(2, 15),
+  sessionIdGenerator: () => uuidv4(), // 生成唯一的会话 ID。必须唯一，不然tools识别不到
   enableJsonResponse: true,
 });
 
 // 挂载 MCP 服务器到 Koa
 router.post("/mcp", async (ctx) => {
+  console.log("mcp post");
   weatherServer.request_context = ctx; // 设置请求上下文
   ctx.respond = false;
   await transport.handleRequest(ctx.req, ctx.res, ctx.request.body);
 });
 
 router.get("/mcp", async (ctx) => {
+  console.log("mcp get");
+  weatherServer.request_context = ctx; // 设置请求上下文
+  ctx.respond = false;
+  await transport.handleRequest(ctx.req, ctx.res);
+});
+
+router.delete("/mcp", async (ctx) => {
+  console.log("mcp get");
   weatherServer.request_context = ctx; // 设置请求上下文
   ctx.respond = false;
   await transport.handleRequest(ctx.req, ctx.res);
