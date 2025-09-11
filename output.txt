@@ -1,0 +1,44 @@
+文件: src/mcp_stdio_server.ts
+
+作用概述:
+- 使用 MCP SDK 创建一个通过 STDIO 通信的 MCP 服务器。
+- 注册一个名为 "query_weather" 的工具，输入参数为 { address: string }。
+- 工具实现: 先通过高德地理编码 API 获取城市信息，再通过天气 API 获取实时天气，返回文本内容。
+- 通过 StdioServerTransport 启动服务器，以便被支持 STDIO 的客户端(如 Cursor Tools)调用。
+
+关键点:
+1) MCP 服务器创建
+   - new McpServer({ name: "weather-server tools", version: "1.0.0" })
+   - 这是业务层，承载工具/资源/提示等。
+
+2) 工具注册 (server.registerTool)
+   - 名称: query_weather
+   - 输入模式: { address: z.string() }
+   - 实现:
+     * 从环境变量读取 API_KEY
+     * 调用 https://restapi.amap.com/v3/geocode/geo?key=API_KEY&address=... 获取地理信息
+     * 从返回结果取 geocodes[0].city 作为城市参数
+     * 调用 https://restapi.amap.com/v3/weather/weatherInfo?key=API_KEY&city=... 获取天气
+     * 若成功, 返回 { content: [{ type: "text", text: JSON.stringify(weatherInfo) }] }
+     * 若失败或无数据, 返回 { content: [{ type: "text", text: String(address) }] }
+
+3) 传输层: STDIO
+   - const transport = new StdioServerTransport();
+   - await server.connect(transport);
+   - 服务器通过标准输入/输出接收/发送 MCP JSON-RPC 消息，适配 Cursor Tools 面板。
+
+运行前提:
+- 环境变量 API_KEY 必须可用(高德 Key)。
+- 客户端(如 Cursor)需要以 STDIO 方式启动此脚本, 例如 mcp.json:
+  {
+    "mcpServers": {
+      "weather-server": {
+        "command": "npx",
+        "args": ["-y", "tsx", "/Users/tal/Documents/code/personal/mcp-server-ts/weather-server-ts/src/mcp_stdio_server.ts"],
+        "env": { "API_KEY": "你的高德Key" }
+      }
+    }
+  }
+
+调用示例:
+- 在 Cursor Tools 面板中选择 weather-server → 运行 query_weather → 参数: { "address": "北京" }。
